@@ -18,10 +18,13 @@
  */
 package org.nuxeo.drive.operations.test;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Assert;
 import org.nuxeo.common.utils.IdUtils;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -30,10 +33,12 @@ import org.nuxeo.ecm.core.api.DocumentRef;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.work.api.WorkManager;
+import org.nuxeo.ecm.platform.audit.api.AuditLogger;
 import org.nuxeo.ecm.platform.usermanager.UserManager;
 import org.nuxeo.ecm.user.center.profile.UserProfileService;
+import org.nuxeo.elasticsearch.ElasticSearchConstants;
+import org.nuxeo.elasticsearch.api.ElasticSearchAdmin;
 import org.nuxeo.runtime.api.Framework;
-
 /**
  * Helper for the Nuxeo Drive integration tests.
  *
@@ -120,7 +125,23 @@ public final class NuxeoDriveIntegrationTestsHelper {
     }
 
     public static void waitForAsyncCompletion() throws InterruptedException {
-        Framework.getService(WorkManager.class).awaitCompletion(20, TimeUnit.SECONDS);
+        Assert.assertTrue(Framework.getService(WorkManager.class).awaitCompletion(20, TimeUnit.SECONDS));
+    }
+
+    public static void waitForAuditIngestion() throws InterruptedException {
+        Assert.assertTrue(Framework.getService(AuditLogger.class).await(20, TimeUnit.SECONDS));
+    }
+
+    public static void waitForElasticIndexing() throws InterruptedException, ExecutionException, TimeoutException {
+        ElasticSearchAdmin esa = Framework.getService(ElasticSearchAdmin.class);
+        // Wait for indexing
+        Assert.assertTrue(esa.prepareWaitForIndexing().get(20, TimeUnit.SECONDS));
+        // Explicit refresh
+        esa.refresh();
+        // Explicit refresh for the audit index until it is handled by esa.refresh
+        Assert.assertEquals(
+                esa.getClient().admin().indices().prepareRefresh(esa.getIndexNameForType(ElasticSearchConstants.ENTRY_TYPE)).get().getFailedShards(),
+                0);
     }
 
 }
