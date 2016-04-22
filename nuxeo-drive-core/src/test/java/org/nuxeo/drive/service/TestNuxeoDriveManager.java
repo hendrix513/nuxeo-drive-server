@@ -472,6 +472,7 @@ public class TestNuxeoDriveManager {
                 "driveEditFile2", "File"));
         nuxeoDriveManager.addToLocallyEditedCollection(session, doc2);
         doc2 = session.getDocument(doc2.getRef());
+        locallyEditedCollection = session.getDocument(locallyEditedCollectionRef);
         assertTrue(cm.isInCollection(locallyEditedCollection, doc2, session));
 
         // Unregister the "Locally Edited" collection and add another document
@@ -482,6 +483,7 @@ public class TestNuxeoDriveManager {
                 "driveEditFile3", "File"));
         nuxeoDriveManager.addToLocallyEditedCollection(session, doc3);
         doc3 = session.getDocument(doc3.getRef());
+        locallyEditedCollection = session.getDocument(locallyEditedCollectionRef);
         assertTrue(cm.isInCollection(locallyEditedCollection, doc3, session));
         assertTrue(nuxeoDriveManager.isSynchronizationRoot(session.getPrincipal(), locallyEditedCollection));
     }

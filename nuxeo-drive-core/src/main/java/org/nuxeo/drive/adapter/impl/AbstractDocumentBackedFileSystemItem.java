@@ -121,7 +121,7 @@ public abstract class AbstractDocumentBackedFileSystemItem extends AbstractFileS
 
     protected boolean handleCollectionMember(DocumentModel doc, CoreSession session, boolean relaxSyncRootConstraint,
             boolean getLockInfo) {
-        if (!doc.hasSchema(CollectionConstants.COLLECTION_MEMBER_SCHEMA_NAME)) {
+        if (doc.hasSchema(CollectionConstants.NOT_COLLECTABLE_FACET)) {
             return false;
         }
         CollectionManager cm = Framework.getService(CollectionManager.class);

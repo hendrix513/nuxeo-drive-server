@@ -115,12 +115,19 @@ public class TestCollectionSyncRootFolderItemFactory {
         FolderItem collectionFSItem = (FolderItem) fsItem;
         List<FileSystemItem> collectionChildren = collectionFSItem.getChildren();
         assertEquals(2, collectionChildren.size());
-        FileSystemItem child1 = collectionChildren.get(0);
+        // TODO NXP-19484 will allow natural order, make a better assert
+        FileSystemItem child1, child2;
+        if (collectionChildren.get(0).getId().equals(doc1.getId())) {
+            child1 = collectionChildren.get(0);
+            child2 = collectionChildren.get(1);
+        } else {
+            child2 = collectionChildren.get(0);
+            child1 = collectionChildren.get(1);
+        }
         assertTrue(child1 instanceof FileItem);
         assertEquals(DEFAULT_FILE_SYSTEM_ITEM_ID_PREFIX + doc1.getId(), child1.getId());
         assertEquals(COLLECTION_SYNC_ROOT_ITEM_ID_PREFIX + collection.getId(), child1.getParentId());
         assertEquals("doc1", child1.getName());
-        FileSystemItem child2 = collectionChildren.get(1);
         assertTrue(child2 instanceof FileItem);
         assertEquals(DEFAULT_FILE_SYSTEM_ITEM_ID_PREFIX + doc2.getId(), child2.getId());
         assertEquals(COLLECTION_SYNC_ROOT_ITEM_ID_PREFIX + collection.getId(), child2.getParentId());
@@ -160,6 +167,7 @@ public class TestCollectionSyncRootFolderItemFactory {
 
         log.trace("Test AbstractDocumentBackedFileSystemItem#delete");
         child1.delete();
+        collection = session.getDocument(collection.getRef());
         assertTrue(!doc1.getCurrentLifeCycleState().equals(LifeCycleConstants.DELETED_STATE));
         assertFalse(collectionManager.isInCollection(collection, doc1, session));
     }

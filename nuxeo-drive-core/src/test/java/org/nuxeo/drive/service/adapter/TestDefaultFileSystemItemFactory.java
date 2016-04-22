@@ -996,6 +996,10 @@ public class TestDefaultFileSystemItemFactory {
         DocumentModel nonSyncrootCollection = collectionManager.createCollection(session, "Non sync root collection",
                 "", session.getRootDocument().getPathAsString());
         collectionManager.addToCollection(nonSyncrootCollection, doc, session);
+
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+
         doc = session.getDocument(doc.getRef());
         try {
             defaultFileSystemItemFactory.getFileSystemItem(doc);
@@ -1009,6 +1013,10 @@ public class TestDefaultFileSystemItemFactory {
                 session.getRootDocument().getPathAsString());
         nuxeoDriveManager.registerSynchronizationRoot(principal, syncRootCollection, session);
         collectionManager.addToCollection(syncRootCollection, doc, session);
+
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+
         doc = session.getDocument(doc.getRef());
         FileSystemItem fsItem = defaultFileSystemItemFactory.getFileSystemItem(doc);
         assertNotNull(fsItem);
